@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Check-in" />
+<meta name="theme-color" content="#4C7862" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Crect width=%27100%27 height=%27100%27 rx=%2722%27 fill=%27%234C7862%27/%3E%3Ccircle cx=%2750%27 cy=%2750%27 r=%2724%27 fill=%27none%27 stroke=%27%23FBFCFB%27 stroke-width=%276%27/%3E%3Ccircle cx=%2750%27 cy=%2750%27 r=%277%27 fill=%27%23FBFCFB%27/%3E%3C/svg%3E" />
+<title>Täglicher Check-in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#E7EAE6;
+    --card:#FDFDFC;
+    --ink:#232B27;
+    --muted:#65716B;
+    --faint:#909a94;
+    --line:#D6DBD5;
+    --line-soft:#E4E8E3;
+    --accent:#4C7862;
+    --accent-ink:#2E5343;
+    --accent-soft:#E1EBE4;
+    --accent-tint:#F0F5F1;
+    --radius:14px;
+    --shadow:0 1px 2px rgba(35,43,39,.04), 0 12px 34px rgba(35,43,39,.07);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    -webkit-font-smoothing:antialiased;
+    padding:24px 18px 60px;
+    line-height:1.5;
+  }
+  .app{width:100%;max-width:620px;}
+
+  /* progress */
+  .top{margin-bottom:26px;}
+  .brand{
+    display:flex;align-items:baseline;justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .brand h1{
+    font-family:'Newsreader',serif;
+    font-weight:500;
+    font-size:1.12rem;
+    letter-spacing:.2px;
+    margin:0;color:var(--ink);
+  }
+  .brand .count{
+    font-size:.78rem;color:var(--faint);
+    font-variant-numeric:tabular-nums;font-weight:500;
+  }
+  .track{height:5px;border-radius:999px;background:var(--line-soft);overflow:hidden;}
+  .fill{height:100%;background:linear-gradient(90deg,#6f9a83,var(--accent));border-radius:999px;
+    width:0;transition:width .45s cubic-bezier(.4,0,.2,1);}
+
+  /* card */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:34px 30px 28px;
+  }
+  @media (max-width:520px){ .card{padding:26px 20px 22px;} body{padding:16px 12px 48px;} }
+
+  .eyebrow{
+    font-family:'Newsreader',serif;
+    font-style:italic;
+    font-size:.9rem;
+    color:var(--accent);
+    margin:0 0 10px;
+    letter-spacing:.2px;
+  }
+  .q{
+    font-family:'Newsreader',serif;
+    font-weight:400;
+    font-size:1.7rem;
+    line-height:1.28;
+    margin:0 0 4px;
+    letter-spacing:.2px;
+    color:var(--ink);
+  }
+  @media (max-width:520px){ .q{font-size:1.42rem;} }
+  .hint{color:var(--muted);font-size:.92rem;margin:8px 0 0;}
+
+  .body{margin-top:26px;}
+
+  /* scale */
+  .scale{display:flex;flex-wrap:wrap;gap:9px;}
+  .tok{
+    appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);
+    width:48px;height:48px;border-radius:50%;font-family:'Inter';font-weight:500;
+    font-size:1rem;cursor:pointer;transition:all .15s ease;font-variant-numeric:tabular-nums;
+  }
+  .tok:hover{border-color:var(--accent);color:var(--accent-ink);}
+  .tok.na{width:auto;border-radius:999px;padding:0 20px;font-style:normal;color:var(--muted);}
+  .tok.sel{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(76,120,98,.28);}
+  .scale-labels{display:flex;justify-content:space-between;margin-top:12px;
+    font-size:.76rem;color:var(--faint);letter-spacing:.3px;}
+
+  /* choices */
+  .choices{display:flex;flex-direction:column;gap:10px;}
+  .opt{
+    display:flex;align-items:center;gap:13px;
+    border:1px solid var(--line);background:#fff;border-radius:12px;
+    padding:14px 16px;cursor:pointer;transition:all .15s ease;text-align:left;
+    font-family:'Inter';font-size:.98rem;color:var(--ink);width:100%;
+  }
+  .opt:hover{border-color:var(--accent);background:var(--accent-tint);}
+  .opt .dot{
+    width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line);
+    flex:0 0 auto;transition:all .15s ease;position:relative;
+  }
+  .opt.multi .dot{border-radius:5px;}
+  .opt.sel{border-color:var(--accent);background:var(--accent-tint);}
+  .opt.sel .dot{border-color:var(--accent);background:var(--accent);}
+  .opt.sel .dot::after{
+    content:"";position:absolute;inset:0;margin:auto;width:7px;height:7px;
+    border-radius:50%;background:#fff;
+  }
+  .opt.multi.sel .dot::after{border-radius:1px;}
+  .opt.own .tag{margin-left:auto;font-size:.68rem;letter-spacing:.4px;text-transform:uppercase;
+    color:var(--faint);border:1px solid var(--line);border-radius:999px;padding:2px 8px;flex:0 0 auto;}
+
+  /* custom entry rows */
+  .opt-row{display:flex;gap:8px;align-items:stretch;}
+  .opt-row .opt{flex:1;}
+  .opt-remove{border:1px solid var(--line);background:#fff;border-radius:12px;width:46px;flex:0 0 auto;
+    color:var(--faint);font-size:1.25rem;line-height:1;cursor:pointer;transition:all .15s ease;}
+  .opt-remove:hover{border-color:#c98a6b;color:#c98a6b;background:#fbf3ee;}
+  .custom-add{display:flex;gap:8px;margin-top:12px;}
+  .custom-add input{flex:1;}
+  .btn-add{border:1px solid var(--accent);background:var(--accent-tint);color:var(--accent-ink);
+    border-radius:12px;padding:0 16px;font-family:'Inter';font-weight:500;font-size:.9rem;
+    cursor:pointer;white-space:nowrap;transition:all .15s ease;}
+  .btn-add:hover{background:var(--accent-soft);}
+
+  /* optional remark */
+  .note-wrap{margin-top:22px;padding-top:16px;border-top:1px dashed var(--line-soft);}
+  .note-toggle{background:none;border:none;color:var(--faint);font-family:'Inter';
+    font-size:.85rem;cursor:pointer;padding:2px 0;transition:color .15s ease;}
+  .note-toggle:hover{color:var(--accent);}
+  .note-wrap.open .note-toggle{color:var(--accent);font-weight:500;}
+  .note-field{display:none;margin-top:10px;min-height:74px;}
+  .note-wrap.open .note-field{display:block;}
+
+  /* text + number */
+  textarea,input[type=text],input[type=number]{
+    width:100%;font-family:'Inter';font-size:1rem;color:var(--ink);
+    border:1px solid var(--line);border-radius:12px;padding:14px 15px;background:#fff;
+    resize:vertical;transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  textarea{min-height:120px;line-height:1.55;}
+  textarea:focus,input:focus{outline:none;border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(76,120,98,.14);}
+  .sentence-lead{
+    font-family:'Newsreader',serif;font-size:1.05rem;color:var(--muted);
+    margin:0 0 12px;line-height:1.5;
+  }
+  .sentence-lead b{color:var(--ink);font-weight:500;font-style:italic;}
+  .hrs{display:flex;align-items:center;gap:10px;}
+  .hrs input{max-width:130px;text-align:center;font-size:1.1rem;font-variant-numeric:tabular-nums;}
+  .hrs .u{color:var(--muted);font-size:1rem;}
+
+  /* nav */
+  .nav{display:flex;align-items:center;justify-content:space-between;margin-top:30px;gap:12px;}
+  .btn{
+    appearance:none;font-family:'Inter';font-weight:500;font-size:.95rem;cursor:pointer;
+    border-radius:11px;padding:12px 22px;transition:all .15s ease;border:1px solid transparent;
+  }
+  .btn.primary{background:var(--accent);color:#fff;box-shadow:0 4px 12px rgba(76,120,98,.25);}
+  .btn.primary:hover{background:var(--accent-ink);}
+  .btn.primary:disabled{background:#b7c4bc;box-shadow:none;cursor:not-allowed;}
+  .btn.ghost{background:transparent;color:var(--muted);border-color:transparent;padding-left:6px;}
+  .btn.ghost:hover{color:var(--ink);}
+  .btn.ghost:disabled{opacity:0;pointer-events:none;}
+  .skip{background:transparent;border:none;color:var(--faint);font-size:.85rem;cursor:pointer;
+    font-family:'Inter';padding:6px;text-decoration:underline;text-underline-offset:3px;}
+  .skip:hover{color:var(--muted);}
+
+  /* animation */
+  .stage{position:relative;}
+  .enter{animation:enter .38s cubic-bezier(.2,.7,.3,1);}
+  @keyframes enter{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+  @media (prefers-reduced-motion:reduce){
+    .enter{animation:none;} .fill{transition:none;}
+  }
+
+  /* intro & report */
+  .center{text-align:center;padding:14px 6px 6px;}
+  .center .lead{font-family:'Newsreader',serif;font-style:italic;color:var(--accent);font-size:1rem;margin:0 0 12px;}
+  .center h2{font-family:'Newsreader',serif;font-weight:400;font-size:2rem;margin:0 0 14px;line-height:1.2;}
+  .center p{color:var(--muted);font-size:.98rem;margin:0 auto 26px;max-width:420px;}
+
+  .report{
+    white-space:pre-wrap;font-family:'Inter';font-size:.92rem;line-height:1.65;
+    color:var(--ink);background:var(--accent-tint);border:1px solid var(--line-soft);
+    border-radius:12px;padding:22px 20px;margin-top:22px;
+    max-height:52vh;overflow:auto;
+  }
+  .report-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;justify-content:center;}
+  .btn.save{background:#fff;color:var(--accent-ink);border:1px solid var(--accent);}
+  .btn.save:hover{background:var(--accent-tint);}
+  .btn.save:disabled{opacity:.6;cursor:default;}
+
+  .intro-history{margin-top:20px;}
+  .btn.link{padding:8px 10px;font-size:.9rem;text-decoration:underline;text-underline-offset:3px;color:var(--accent-ink);}
+  .btn.link:hover{color:var(--accent);}
+  .tiny-note{font-size:.8rem;color:var(--faint);line-height:1.45;margin:10px auto 0;max-width:420px;}
+
+  .day-list{display:flex;flex-direction:column;gap:8px;margin-top:18px;}
+  .day-item{display:flex;align-items:center;justify-content:space-between;
+    border:1px solid var(--line);background:#fff;border-radius:12px;padding:15px 16px;
+    font-family:'Inter';font-size:1rem;color:var(--ink);cursor:pointer;transition:all .15s ease;text-align:left;}
+  .day-item:hover{border-color:var(--accent);background:var(--accent-tint);}
+  .day-item .chev{color:var(--faint);font-size:1.3rem;line-height:1;}
+  .day-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;}
+  .day-nav .tiny-note{margin:0;font-variant-numeric:tabular-nums;}
+
+  .backup-block{border:1px solid var(--line);border-radius:14px;padding:18px 16px;margin-top:18px;background:#fff;}
+  .backup-h{font-family:'Newsreader',serif;font-weight:500;font-size:1.12rem;margin:0 0 4px;color:var(--ink);}
+  .backup-block .btn{margin-top:12px;}
+  .backup-block .tiny-note{margin-top:0;}
+  .export-area{min-height:90px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8rem;}
+  .file-input{display:block;margin-top:12px;font-family:'Inter';font-size:.9rem;color:var(--muted);width:100%;}
+  .file-input::file-selector-button{font-family:'Inter';font-weight:500;font-size:.88rem;
+    border:1px solid var(--accent);background:var(--accent-tint);color:var(--accent-ink);
+    border-radius:10px;padding:9px 14px;margin-right:12px;cursor:pointer;}
+
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:11px 20px;border-radius:999px;font-size:.9rem;
+    opacity:0;pointer-events:none;transition:all .3s ease;z-index:20;max-width:88vw;text-align:center;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="top" id="top" hidden>
+      <div class="brand">
+        <h1>Täglicher Check-in</h1>
+        <span class="count" id="count"></span>
+      </div>
+      <div class="track"><div class="fill" id="fill"></div></div>
+    </div>
+    <div class="card">
+      <div class="stage" id="stage"></div>
+    </div>
+  </div>
+  <div class="toast" id="toast">In die Zwischenablage kopiert</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- Question definitions -------------------------------------------------
+  var STEPS = [
+    { id:"sleep", type:"sleep", num:"1", eyebrow:"Regeneration",
+      title:"Wie war dein Schlaf?" },
+    { id:"energy", type:"scale", num:"2", eyebrow:"Vitalität",
+      title:"Wie viel Energie hast du?", low:"leer", high:"voll" },
+    { id:"stress", type:"scale", num:"3", eyebrow:"Anspannung",
+      title:"Stress und innere Anspannung", low:"ruhig", high:"stark" },
+    { id:"nervous", type:"choice", num:"4", eyebrow:"Nervensystem", custom:true,
+      title:"Wie ist dein Nervensystem heute?",
+      options:["ruhig und präsent","angespannt","stark im Kopf und grübelnd","zurückgezogen oder erstarrt","Flucht- oder Klärungsimpuls"] },
+    { id:"joy", type:"scale", num:"5", eyebrow:"Stimmung",
+      title:"Lebensfreude und Stimmung", low:"gedrückt", high:"hell" },
+    { id:"worth", type:"scale", num:"6", eyebrow:"Selbstwert",
+      title:"Selbstwert und innere Sicherheit", low:"unsicher", high:"sicher" },
+    { id:"appetite", type:"choice", num:"7", eyebrow:"Körper",
+      title:"Wie war dein Appetit?", options:["normal","stärker","schwächer"] },
+    { id:"libido", type:"choice", num:"8", eyebrow:"Verlangen", custom:true,
+      title:"Libido heute",
+      options:["keine","körperliche Lust","Sehnsucht nach Nähe","Wunsch nach Bestätigung","Mischung"] },
+    { id:"sexmind", type:"scale", num:"9", eyebrow:"Aufmerksamkeit",
+      title:"Wie viel Raum hatte das Sex-Thema heute im Kopf?", low:"gar keinen", high:"sehr viel" },
+    { id:"sex", type:"choice", num:"10", eyebrow:"Intimität",
+      title:"Sex oder sexuelle Intimität?", options:["ja","nein"] },
+    { id:"sex_who", type:"choice", num:"10", eyebrow:"Intimität",
+      title:"Wer hat begonnen?", options:["ich","Mandy"],
+      when:function(a){return a.sex==="ja";} },
+    { id:"sex_after", type:"text", num:"10", eyebrow:"Intimität",
+      title:"Wie ging es dir danach?", placeholder:"In deinen eigenen Worten …",
+      when:function(a){return a.sex==="ja";} },
+    { id:"alone", type:"scale_na", num:"11", eyebrow:"Bei mir bleiben",
+      title:"Alleinsein und bei mir bleiben", low:"schwer", high:"leicht" },
+    { id:"alone_text", type:"text", num:"11", eyebrow:"Bei mir bleiben",
+      title:"Konnte ich meinen eigenen Tag oder Abend leben — oder habe ich innerlich auf Mandy gewartet?",
+      placeholder:"In deinen eigenen Worten …",
+      when:function(a){return a.alone!=null && a.alone!=="n/a";} },
+    { id:"impulse", type:"choice", num:"12", eyebrow:"Impuls", custom:true,
+      title:"Stärkster Impuls heute",
+      options:["warten und beobachten","kontrollieren","klären","zurückziehen","mich ausdrücken","etwas Eigenes tun"] },
+    { id:"body", type:"multi", num:"13", eyebrow:"Körpermarker", custom:true,
+      title:"Was hat sich im Körper gezeigt?",
+      hint:"Mehrfachauswahl möglich.",
+      options:["Bauch eng","Brustdruck","Kiefer angespannt","Herzklopfen","Unruhe","Erstarren","kein klarer Marker"],
+      exclusive:"kein klarer Marker" },
+    { id:"early", type:"scale_na", num:"14", eyebrow:"Achtsamkeit",
+      title:"Wie früh habe ich erkannt, was gerade in mir passiert?", low:"spät", high:"früh" },
+    { id:"sentence", type:"sentence", num:"15", eyebrow:"Ein ehrlicher Satz",
+      lead:"Bevor ich alles erklärt, kontrolliert oder verstanden habe, war ich",
+      placeholder:"… (vervollständige den Satz)",
+      when:function(a){return a.early!=null && a.early!=="n/a";} },
+    { id:"sit_has", type:"choice", num:"16", eyebrow:"Situation mit Mandy", noNote:true,
+      title:"Gab es heute eine wichtige Situation mit Mandy?", options:["ja","nein"] },
+    { id:"sit_what", type:"text", num:"16", eyebrow:"Situation mit Mandy",
+      title:"Was ist konkret passiert?", when:sit },
+    { id:"sit_body", type:"text", num:"16", eyebrow:"Situation mit Mandy",
+      title:"Was habe ich im Körper bemerkt?", when:sit },
+    { id:"sit_first", type:"text", num:"16", eyebrow:"Situation mit Mandy",
+      title:"Welcher Satz kam zuerst?", when:sit },
+    { id:"sit_want", type:"text", num:"16", eyebrow:"Situation mit Mandy",
+      title:"Was wollte ich unmittelbar tun?", when:sit },
+    { id:"sit_did", type:"text", num:"16", eyebrow:"Situation mit Mandy",
+      title:"Was habe ich tatsächlich getan?", when:sit },
+    { id:"sit_dur", type:"text", num:"16", eyebrow:"Situation mit Mandy",
+      title:"Wie lange hat es gedauert, bis ich wieder bei mir war?",
+      placeholder:"z. B. 20 Minuten / 2 Stunden / den ganzen Tag", when:sit },
+    { id:"sit_change", type:"text", num:"16", eyebrow:"Situation mit Mandy",
+      title:"Was wollte ich durch meine Reaktion bei Mandy verändern?", when:sit }
+  ];
+  function sit(a){ return a.sit_has==="ja"; }
+
+  // ---- State ----------------------------------------------------------------
+  var answers = {};
+  var pos = 0;            // -1 intro, 0..n steps, "report"
+  var screen = "intro";   // intro | step | report | history | dayview
+  var days = [];          // sorted list of saved date keys
+  var viewIndex = 0;      // index into days for dayview
+  var savedToday = false;
+
+  var stage = document.getElementById("stage");
+  var top = document.getElementById("top");
+  var fill = document.getElementById("fill");
+  var count = document.getElementById("count");
+  var toast = document.getElementById("toast");
+
+  function visibleSteps(){
+    return STEPS.filter(function(s){ return !s.when || s.when(answers); });
+  }
+
+  function fmt(v){ return (v===null||v===undefined||v==="") ? "—" : v; }
+
+  // ---- Persistence (lokaler Gerätespeicher) ---------------------------------
+  var Store = {
+    ok: (function(){ try{ var k="__probe__"; localStorage.setItem(k,"1"); localStorage.removeItem(k); return true; }catch(e){ return false; } })(),
+    save: function(key, data){
+      try{ localStorage.setItem("day:"+key, JSON.stringify(data)); return Promise.resolve(true); }
+      catch(e){ return Promise.resolve(false); }
+    },
+    load: function(key){
+      try{ var v=localStorage.getItem("day:"+key); return Promise.resolve(v?JSON.parse(v):null); }
+      catch(e){ return Promise.resolve(null); }
+    },
+    list: function(){
+      try{
+        var out=[];
+        for(var i=0;i<localStorage.length;i++){
+          var k=localStorage.key(i);
+          if(k && k.indexOf("day:")===0) out.push(k.slice(4));
+        }
+        out.sort();
+        return Promise.resolve(out);
+      }catch(e){ return Promise.resolve([]); }
+    },
+    remove: function(key){
+      try{ localStorage.removeItem("day:"+key); return Promise.resolve(true); }
+      catch(e){ return Promise.resolve(false); }
+    }
+  };
+  function pad(n){ return (n<10?"0":"")+n; }
+  function todayKey(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function prettyDate(key){
+    var p=key.split("-"); if(p.length!==3) return key;
+    var d=new Date(+p[0], +p[1]-1, +p[2]);
+    var wd=["So","Mo","Di","Mi","Do","Fr","Sa"][d.getDay()];
+    return wd+", "+p[2]+"."+p[1]+"."+p[0];
+  }
+
+  // ---- Render ---------------------------------------------------------------
+  function render(){
+    if(screen==="intro"){ renderIntro(); return; }
+    if(screen==="report"){ renderReport(); return; }
+    if(screen==="history"){ renderHistory(); return; }
+    if(screen==="dayview"){ renderDayView(); return; }
+    if(screen==="backup"){ renderBackup(); return; }
+    renderStep();
+  }
+
+  function el(html){
+    var d=document.createElement("div"); d.innerHTML=html.trim(); return d.firstChild;
+  }
+
+  function renderIntro(){
+    top.hidden=true;
+    stage.innerHTML="";
+    var d=el(
+      '<div class="center enter">'+
+      '<p class="lead">Guten Morgen</p>'+
+      '<h2>Deine Marker von gestern</h2>'+
+      '<p>Ein kurzer, ruhiger Durchgang durch deine Tagesmarker. '+
+      'Frage für Frage. Am Ende bekommst du den fertigen Bericht für Joe zum Kopieren.</p>'+
+      '<button class="btn primary" id="start">Beginnen</button>'+
+      '<div id="introHistory" class="intro-history"></div>'+
+      '</div>');
+    stage.appendChild(d);
+    document.getElementById("start").onclick=function(){ answers={}; savedToday=false; screen="step"; pos=0; render(); };
+    // Verlauf asynchron laden
+    Store.list().then(function(list){
+      days=list;
+      var box=document.getElementById("introHistory");
+      if(!box) return;
+      if(!Store.ok){
+        box.innerHTML='<p class="tiny-note">Verlauf auf diesem Gerät nicht verfügbar – Einträge bleiben nur für die aktuelle Sitzung erhalten.</p>';
+        return;
+      }
+      if(days.length){
+        box.innerHTML='<button class="btn ghost link" id="toHistory">Frühere Tage ansehen ('+days.length+')</button>';
+      } else {
+        box.innerHTML='<button class="btn ghost link" id="toHistory">Frühere Tage &amp; Sicherung</button>';
+      }
+      document.getElementById("toHistory").onclick=function(){ screen="history"; render(); };
+    });
+  }
+
+  function renderHistory(){
+    top.hidden=true;
+    stage.innerHTML="";
+    var d=el(
+      '<div class="enter">'+
+      '<p class="eyebrow">Verlauf</p>'+
+      '<h2 class="q">Frühere Tage</h2>'+
+      '<p class="hint">Tippe auf einen Tag, um den gespeicherten Bericht zu öffnen.</p>'+
+      '<div class="day-list" id="dayList"></div>'+
+      '<div class="report-actions" style="justify-content:flex-start;margin-top:22px">'+
+        '<button class="btn ghost" id="backIntro">Zurück</button>'+
+        '<button class="btn ghost link" id="toBackup">Sicherung (Export / Import)</button>'+
+      '</div></div>');
+    stage.innerHTML=""; stage.appendChild(d);
+    document.getElementById("backIntro").onclick=function(){ screen="intro"; render(); };
+    document.getElementById("toBackup").onclick=function(){ screen="backup"; render(); };
+    Store.list().then(function(list){
+      days=list;
+      var wrap=document.getElementById("dayList");
+      if(!wrap) return;
+      if(!days.length){ wrap.innerHTML='<p class="hint">Noch keine gespeicherten Tage.</p>'; return; }
+      var html="";
+      for(var i=days.length-1;i>=0;i--){
+        html+='<button class="day-item" data-k="'+esc(days[i])+'"><span>'+esc(prettyDate(days[i]))+'</span><span class="chev">›</span></button>';
+      }
+      wrap.innerHTML=html;
+      Array.prototype.forEach.call(wrap.querySelectorAll(".day-item"),function(b){
+        b.onclick=function(){
+          viewIndex=days.indexOf(b.getAttribute("data-k"));
+          screen="dayview"; render();
+        };
+      });
+    });
+  }
+
+  function renderBackup(){
+    top.hidden=true;
+    stage.innerHTML="";
+    var avail = Store.ok;
+    var d=el(
+      '<div class="enter">'+
+      '<p class="eyebrow">Sicherung</p>'+
+      '<h2 class="q">Export &amp; Import</h2>'+
+      '<p class="hint">Sichere alle gespeicherten Tage als Datei und lade sie auf einem anderen Gerät wieder ein.</p>'+
+      (avail?'':'<p class="tiny-note">Der lokale Speicher ist hier nicht verfügbar (z. B. privater Modus). Export/Import funktioniert dann nicht zuverlässig.</p>')+
+      '<div class="backup-block">'+
+        '<h3 class="backup-h">Exportieren</h3>'+
+        '<p class="tiny-note" id="expInfo">Erstellt eine Datei mit allen gespeicherten Tagen.</p>'+
+        '<button class="btn primary" id="doExport">Exportieren</button>'+
+        '<textarea class="note-field export-area" id="exportArea" readonly placeholder="Nach dem Export erscheint hier der Sicherungstext – als Fallback zum Kopieren."></textarea>'+
+        '<button class="btn ghost link" id="copyExport" style="display:none">Text kopieren</button>'+
+      '</div>'+
+      '<div class="backup-block">'+
+        '<h3 class="backup-h">Importieren</h3>'+
+        '<p class="tiny-note">Sicherungsdatei auswählen – oder den Text unten einfügen.</p>'+
+        '<input type="file" id="importFile" accept="application/json,.json,text/plain" class="file-input" />'+
+        '<textarea class="note-field" id="importArea" placeholder="… oder Sicherungstext hier einfügen"></textarea>'+
+        '<button class="btn primary" id="doImport">Importieren</button>'+
+        '<p class="tiny-note" id="importMsg" style="margin-top:10px"></p>'+
+      '</div>'+
+      '<div class="report-actions" style="justify-content:flex-start;margin-top:6px">'+
+        '<button class="btn ghost" id="backHistory">Zurück</button>'+
+      '</div></div>');
+    stage.innerHTML=""; stage.appendChild(d);
+    document.getElementById("backHistory").onclick=function(){ screen="history"; render(); };
+
+    Store.list().then(function(list){
+      days=list;
+      var info=document.getElementById("expInfo");
+      if(info) info.textContent="Erstellt eine Datei mit allen "+days.length+" gespeicherten Tagen.";
+    });
+
+    var exportArea=document.getElementById("exportArea");
+    var copyBtn=document.getElementById("copyExport");
+    document.getElementById("doExport").onclick=function(){
+      buildExportText().then(function(json){
+        exportArea.value=json;
+        copyBtn.style.display="inline-block";
+        shareOrDownload("checkin-sicherung-"+todayKey()+".json", json);
+      });
+    };
+    copyBtn.onclick=function(){ if(exportArea.value) copy(exportArea.value); };
+
+    var importArea=document.getElementById("importArea");
+    var importMsg=document.getElementById("importMsg");
+    document.getElementById("importFile").onchange=function(e){
+      var f=e.target.files && e.target.files[0];
+      if(!f) return;
+      var rd=new FileReader();
+      rd.onload=function(){ importArea.value=String(rd.result||""); importMsg.textContent="Datei geladen – jetzt auf „Importieren“ tippen."; };
+      rd.onerror=function(){ importMsg.textContent="Datei konnte nicht gelesen werden."; };
+      rd.readAsText(f);
+    };
+    document.getElementById("doImport").onclick=function(){
+      var text=(importArea.value||"").trim();
+      if(!text){ importMsg.textContent="Bitte zuerst eine Datei wählen oder Text einfügen."; return; }
+      var res=applyImport(text);
+      if(!res.ok){ importMsg.textContent=res.msg; return; }
+      Store.list().then(function(list){
+        days=list;
+        importMsg.textContent=res.count+" Tag(e) importiert.";
+        showToastMsg(res.count+" Tag(e) importiert");
+      });
+    };
+  }
+
+  function buildExportText(){
+    return Store.list().then(function(list){
+      return Promise.all(list.map(function(k){
+        return Store.load(k).then(function(e){ return {k:k, e:e}; });
+      }));
+    }).then(function(pairs){
+      var data={ app:"taeglicher-checkin", version:1, exportedAt:new Date().toISOString(), days:{} };
+      pairs.forEach(function(p){ if(p.e) data.days[p.k]=p.e; });
+      return JSON.stringify(data, null, 2);
+    });
+  }
+
+  function shareOrDownload(name, text){
+    var file=null;
+    try{ file=new File([text], name, {type:"application/json"}); }catch(e){ file=null; }
+    if(file && navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){
+      navigator.share({files:[file], title:name}).catch(function(){ downloadFile(name, text); });
+    } else {
+      downloadFile(name, text);
+    }
+  }
+  function downloadFile(name, text){
+    try{
+      var blob=new Blob([text], {type:"application/json"});
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement("a");
+      a.href=url; a.download=name;
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ try{document.body.removeChild(a);}catch(e){} URL.revokeObjectURL(url); }, 150);
+    }catch(e){ /* Fallback: Text steht im Feld zum Kopieren bereit */ }
+  }
+  function applyImport(text){
+    var obj;
+    try{ obj=JSON.parse(text); }catch(e){ return {ok:false, msg:"Das ist kein gültiges JSON."}; }
+    if(!obj || typeof obj!=="object" || !obj.days || typeof obj.days!=="object"){
+      return {ok:false, msg:"Kein gültiges Sicherungsformat (erwartet: Feld „days“)."};
+    }
+    var keys=Object.keys(obj.days), n=0;
+    for(var i=0;i<keys.length;i++){
+      var k=keys[i], e=obj.days[k];
+      if(e && /^\d{4}-\d{2}-\d{2}$/.test(k)){
+        try{ localStorage.setItem("day:"+k, JSON.stringify(e)); n++; }catch(err){}
+      }
+    }
+    if(!n) return {ok:false, msg:"Keine gültigen Tage in der Sicherung gefunden."};
+    return {ok:true, count:n};
+  }
+
+  function renderDayView(){
+    top.hidden=true;
+    stage.innerHTML="";
+    if(!days.length){ screen="history"; render(); return; }
+    if(viewIndex<0) viewIndex=0;
+    if(viewIndex>days.length-1) viewIndex=days.length-1;
+    var key=days[viewIndex];
+    var d=el(
+      '<div class="enter">'+
+      '<p class="eyebrow">Verlauf</p>'+
+      '<h2 class="q" id="dvTitle">'+esc(prettyDate(key))+'</h2>'+
+      '<div class="report" id="dvReport">Lädt …</div>'+
+      '<div class="day-nav">'+
+        '<button class="btn ghost" id="dvPrev">‹ Vorheriger</button>'+
+        '<span class="tiny-note" id="dvPos"></span>'+
+        '<button class="btn ghost" id="dvNext">Nächster ›</button>'+
+      '</div>'+
+      '<div class="report-actions" style="margin-top:8px">'+
+        '<button class="btn primary" id="dvCopy">Bericht kopieren</button>'+
+        '<button class="btn ghost" id="dvList">Übersicht</button>'+
+        '<button class="skip" id="dvDelete">Diesen Tag löschen</button>'+
+      '</div></div>');
+    stage.innerHTML=""; stage.appendChild(d);
+    document.getElementById("dvPos").textContent=(viewIndex+1)+" / "+days.length;
+    document.getElementById("dvPrev").disabled = viewIndex<=0;
+    document.getElementById("dvNext").disabled = viewIndex>=days.length-1;
+    document.getElementById("dvPrev").onclick=function(){ if(viewIndex>0){viewIndex--;render();} };
+    document.getElementById("dvNext").onclick=function(){ if(viewIndex<days.length-1){viewIndex++;render();} };
+    document.getElementById("dvList").onclick=function(){ screen="history"; render(); };
+    var reportText="";
+    Store.load(key).then(function(entry){
+      reportText = (entry && entry.report) ? entry.report : "(kein Inhalt gespeichert)";
+      var r=document.getElementById("dvReport"); if(r) r.textContent=reportText;
+    });
+    document.getElementById("dvCopy").onclick=function(){ if(reportText) copy(reportText); };
+    document.getElementById("dvDelete").onclick=function(){
+      if(confirm("Eintrag vom "+prettyDate(key)+" löschen?")){
+        Store.remove(key).then(function(){
+          days.splice(viewIndex,1);
+          if(!days.length){ screen="history"; }
+          else if(viewIndex>days.length-1){ viewIndex=days.length-1; }
+          render();
+        });
+      }
+    };
+  }
+
+  function renderStep(){
+    var steps=visibleSteps();
+    if(pos>=steps.length){ screen="report"; render(); return; }
+    if(pos<0) pos=0;
+    var s=steps[pos];
+    top.hidden=false;
+    count.textContent="Schritt "+(pos+1)+" von "+steps.length;
+    fill.style.width=((pos)/(steps.length))*100+"%";
+
+    var head=
+      '<p class="eyebrow">'+s.num+' &nbsp;·&nbsp; '+s.eyebrow+'</p>'+
+      (s.type==="sentence"?"":'<h2 class="q">'+esc(s.title)+'</h2>')+
+      (s.hint?'<p class="hint">'+esc(s.hint)+'</p>':'');
+
+    var bodyHtml = renderBody(s);
+    var noteHtml = hasNote(s) ? renderNoteField(s) : "";
+    var wrap=el('<div class="enter"><div class="qhead">'+head+'</div><div class="body">'+bodyHtml+'</div>'+
+      noteHtml + renderNav(s)+'</div>');
+    stage.innerHTML=""; stage.appendChild(wrap);
+    bindBody(s);
+    bindNote(s);
+    bindNav(s);
+    updateNext(s);
+  }
+
+  function hasNote(s){
+    if(s.noNote) return false;
+    return ["scale","scale_na","choice","multi","sleep"].indexOf(s.type)>-1;
+  }
+  function renderNoteField(s){
+    var v = answers[s.id+"__note"]||"";
+    var open = !!(v && v.trim());
+    return '<div class="note-wrap'+(open?" open":"")+'" id="noteWrap">'+
+      '<button type="button" class="note-toggle" id="noteToggle">'+(open?"Bemerkung":"+ Bemerkung")+'</button>'+
+      '<textarea class="note-field" id="noteField" placeholder="Optionale Bemerkung – kommt mit in den Report …">'+esc(v)+'</textarea>'+
+      '</div>';
+  }
+  function bindNote(s){
+    if(!hasNote(s)) return;
+    var wrap=document.getElementById("noteWrap");
+    var tgl=document.getElementById("noteToggle");
+    var fld=document.getElementById("noteField");
+    if(!wrap||!tgl||!fld) return;
+    tgl.onclick=function(){
+      wrap.classList.toggle("open");
+      if(wrap.classList.contains("open")){ tgl.textContent="Bemerkung"; fld.focus(); }
+      else { tgl.textContent = (fld.value.trim()? "Bemerkung" : "+ Bemerkung"); }
+    };
+    fld.oninput=function(){ answers[s.id+"__note"]=fld.value; };
+  }
+
+  function renderBody(s){
+    var a=answers[s.id];
+    if(s.type==="scale"||s.type==="scale_na"){
+      var toks="";
+      for(var i=0;i<=10;i++){
+        toks+='<button class="tok'+(a===i?' sel':'')+'" data-v="'+i+'">'+i+'</button>';
+      }
+      if(s.type==="scale_na"){
+        toks+='<button class="tok na'+(a==="n/a"?' sel':'')+'" data-v="n/a">n/a</button>';
+      }
+      var labels = (s.low||s.high)?
+        '<div class="scale-labels"><span>'+esc(s.low||"")+'</span><span>'+esc(s.high||"")+'</span></div>':'';
+      return '<div class="scale">'+toks+'</div>'+labels;
+    }
+    if(s.type==="choice"||s.type==="multi"){
+      var multi = s.type==="multi";
+      var sel = multi ? (Array.isArray(a)?a:[]) : a;
+      var custom = customList(s);
+      var html='<div class="choices">';
+      s.options.forEach(function(o){
+        var on = multi ? sel.indexOf(o)>-1 : sel===o;
+        html+='<button class="opt'+(multi?' multi':'')+(on?' sel':'')+'" data-o="'+esc(o)+'">'+
+              '<span class="dot"></span><span>'+esc(o)+'</span></button>';
+      });
+      custom.forEach(function(o){
+        var on = multi ? sel.indexOf(o)>-1 : sel===o;
+        html+='<div class="opt-row">'+
+              '<button class="opt own'+(multi?' multi':'')+(on?' sel':'')+'" data-o="'+esc(o)+'">'+
+              '<span class="dot"></span><span>'+esc(o)+'</span><span class="tag">eigen</span></button>'+
+              '<button class="opt-remove" data-rm="'+esc(o)+'" title="Eintrag entfernen">&times;</button>'+
+              '</div>';
+      });
+      html+='</div>';
+      if(s.custom){
+        html+='<div class="custom-add">'+
+          '<input type="text" id="customInput" placeholder="Eigener Eintrag …" maxlength="80">'+
+          '<button type="button" class="btn-add" id="customAdd">Hinzufügen</button>'+
+          '</div>';
+      }
+      return html;
+    }
+    if(s.type==="sleep"){
+      var h=answers.sleep_h||"";
+      var q=answers.sleep_q;
+      var toks="";
+      for(var j=0;j<=10;j++){ toks+='<button class="tok'+(q===j?' sel':'')+'" data-v="'+j+'">'+j+'</button>'; }
+      return '<p class="hint" style="margin-top:0">Dauer</p>'+
+        '<div class="hrs"><input type="number" id="sleepH" min="0" max="24" step="0.5" '+
+          'placeholder="7,5" value="'+esc(h)+'"><span class="u">Stunden</span></div>'+
+        '<p class="hint" style="margin-top:22px">Qualität</p>'+
+        '<div class="scale">'+toks+'</div>'+
+        '<div class="scale-labels"><span>schlecht</span><span>erholsam</span></div>';
+    }
+    if(s.type==="text"){
+      return '<textarea id="txt" placeholder="'+esc(s.placeholder||"In deinen eigenen Worten …")+'">'+esc(a||"")+'</textarea>';
+    }
+    if(s.type==="sentence"){
+      return '<p class="sentence-lead"><b>„'+esc(s.lead)+' …"</b></p>'+
+        '<textarea id="txt" placeholder="'+esc(s.placeholder||"")+'">'+esc(a||"")+'</textarea>';
+    }
+    return "";
+  }
+
+  function renderNav(s){
+    var optional = (s.type==="text"||s.type==="sentence"||s.type==="sleep");
+    var lastLike = false;
+    return '<div class="nav">'+
+      '<button class="btn ghost" id="back">Zurück</button>'+
+      '<div style="display:flex;align-items:center;gap:14px">'+
+      (optional?'<button class="skip" id="skip">überspringen</button>':'')+
+      '<button class="btn primary" id="next">Weiter</button>'+
+      '</div></div>';
+  }
+
+  function bindBody(s){
+    if(s.type==="scale"||s.type==="scale_na"){
+      Array.prototype.forEach.call(stage.querySelectorAll(".tok"),function(b){
+        b.onclick=function(){
+          var v=b.getAttribute("data-v");
+          answers[s.id]= v==="n/a"?"n/a":parseInt(v,10);
+          markScale(s); updateNext(s);
+        };
+      });
+    } else if(s.type==="choice"||s.type==="multi"){
+      var multi = s.type==="multi";
+      Array.prototype.forEach.call(stage.querySelectorAll(".opt"),function(b){
+        b.onclick=function(){
+          var o=b.getAttribute("data-o");
+          if(multi){
+            var arr=Array.isArray(answers[s.id])?answers[s.id].slice():[];
+            if(s.exclusive && o===s.exclusive){ arr=[o]; }
+            else {
+              var i=arr.indexOf(o);
+              if(i>-1) arr.splice(i,1); else arr.push(o);
+              if(s.exclusive){ var ei=arr.indexOf(s.exclusive); if(ei>-1) arr.splice(ei,1); }
+            }
+            answers[s.id]=arr;
+            renderMulti(s);
+          } else {
+            answers[s.id]=o;
+            Array.prototype.forEach.call(stage.querySelectorAll(".opt"),function(x){x.classList.remove("sel");});
+            b.classList.add("sel");
+          }
+          updateNext(s);
+        };
+      });
+      Array.prototype.forEach.call(stage.querySelectorAll(".opt-remove"),function(b){
+        b.onclick=function(){
+          var o=b.getAttribute("data-rm");
+          answers[s.id+"__custom"]=customList(s).filter(function(x){return x!==o;});
+          if(multi){ answers[s.id]=(answers[s.id]||[]).filter(function(x){return x!==o;}); }
+          else if(answers[s.id]===o){ answers[s.id]=undefined; }
+          refreshChoices(s);
+        };
+      });
+      var addBtn=document.getElementById("customAdd");
+      if(addBtn){
+        var inp=document.getElementById("customInput");
+        var doAdd=function(){
+          var val=(inp.value||"").trim();
+          if(!val) return;
+          var cust=customList(s).slice();
+          if(cust.indexOf(val)===-1 && s.options.indexOf(val)===-1){ cust.push(val); }
+          answers[s.id+"__custom"]=cust;
+          if(multi){
+            var arr=Array.isArray(answers[s.id])?answers[s.id].slice():[];
+            if(s.exclusive){ var ei=arr.indexOf(s.exclusive); if(ei>-1) arr.splice(ei,1); }
+            if(arr.indexOf(val)===-1) arr.push(val);
+            answers[s.id]=arr;
+          } else {
+            answers[s.id]=val;
+          }
+          inp.value="";
+          refreshChoices(s);
+        };
+        addBtn.onclick=doAdd;
+        inp.onkeydown=function(e){ if(e.key==="Enter"){ e.preventDefault(); e.stopPropagation(); doAdd(); } };
+      }
+    } else if(s.type==="sleep"){
+      var hi=document.getElementById("sleepH");
+      hi.oninput=function(){ answers.sleep_h=hi.value.trim(); };
+      Array.prototype.forEach.call(stage.querySelectorAll(".tok"),function(b){
+        b.onclick=function(){
+          answers.sleep_q=parseInt(b.getAttribute("data-v"),10);
+          Array.prototype.forEach.call(stage.querySelectorAll(".tok"),function(x){x.classList.remove("sel");});
+          b.classList.add("sel");
+        };
+      });
+    } else if(s.type==="text"||s.type==="sentence"){
+      var t=document.getElementById("txt");
+      t.oninput=function(){ answers[s.id]=t.value; };
+    }
+  }
+
+  function markScale(s){
+    Array.prototype.forEach.call(stage.querySelectorAll(".tok"),function(x){
+      var v=x.getAttribute("data-v");
+      var val = v==="n/a"?"n/a":parseInt(v,10);
+      if(answers[s.id]===val) x.classList.add("sel"); else x.classList.remove("sel");
+    });
+  }
+  function renderMulti(s){
+    var sel=answers[s.id]||[];
+    Array.prototype.forEach.call(stage.querySelectorAll(".opt"),function(x){
+      if(sel.indexOf(x.getAttribute("data-o"))>-1) x.classList.add("sel"); else x.classList.remove("sel");
+    });
+  }
+  function customList(s){
+    var c=answers[s.id+"__custom"];
+    return Array.isArray(c)?c:[];
+  }
+  function refreshChoices(s){
+    var bodyEl=stage.querySelector(".body");
+    if(!bodyEl) return;
+    bodyEl.innerHTML=renderBody(s);
+    bindBody(s);
+    updateNext(s);
+    var inp=document.getElementById("customInput"); if(inp) inp.focus();
+  }
+
+  function bindNav(s){
+    document.getElementById("back").onclick=function(){
+      if(pos===0){ screen="intro"; render(); }
+      else { pos--; render(); }
+    };
+    document.getElementById("next").onclick=function(){ if(canProceed(s)){ pos++; render(); } };
+    var sk=document.getElementById("skip");
+    if(sk) sk.onclick=function(){ pos++; render(); };
+  }
+
+  function canProceed(s){
+    if(s.type==="scale"||s.type==="scale_na") return answers[s.id]!==undefined;
+    if(s.type==="choice") return !!answers[s.id];
+    if(s.type==="multi") return Array.isArray(answers[s.id]) && answers[s.id].length>0;
+    return true; // text / sentence / sleep are optional
+  }
+  function updateNext(s){
+    var btn=document.getElementById("next");
+    if(btn) btn.disabled = !canProceed(s);
+  }
+
+  // ---- Report ---------------------------------------------------------------
+  function has(v){
+    if(v===null||v===undefined) return false;
+    if(typeof v==="string") return v.trim()!=="";
+    if(Array.isArray(v)) return v.length>0;
+    return true;
+  }
+  function buildReport(){
+    var a=answers, L=[];
+    function pn(id){ var n=a[id+"__note"]; if(has(n)) L.push("    Bemerkung: "+String(n).trim()); }
+    L.push("Guten Morgen Joe, hier die Marker von gestern:");
+    L.push("");
+    if(has(a.sleep_h)||has(a.sleep_q)){
+      L.push("1. Schlaf: Dauer "+(has(a.sleep_h)?a.sleep_h+" h":"— h")+", Qualität "+fmt(a.sleep_q)); pn("sleep");
+    }
+    L.push("2. Energie: "+fmt(a.energy)); pn("energy");
+    L.push("3. Stress / innere Anspannung: "+fmt(a.stress)); pn("stress");
+    L.push("4. Nervensystem heute: "+fmt(a.nervous)); pn("nervous");
+    L.push("5. Lebensfreude / Stimmung: "+fmt(a.joy)); pn("joy");
+    L.push("6. Selbstwert / innere Sicherheit: "+fmt(a.worth)); pn("worth");
+    L.push("7. Appetit: "+fmt(a.appetite)); pn("appetite");
+    L.push("8. Libido: "+fmt(a.libido)); pn("libido");
+    L.push("9. Wie viel Raum hatte das Sex-Thema heute im Kopf? "+fmt(a.sexmind)); pn("sexmind");
+    L.push("10. Sex oder sexuelle Intimität: "+fmt(a.sex)); pn("sex");
+    if(a.sex==="ja"){
+      var sub="    Wer hat begonnen: "+fmt(a.sex_who)+".";
+      if(has(a.sex_after)) sub+=" Wie ging es dir danach? "+a.sex_after;
+      L.push(sub); pn("sex_who");
+    }
+    var al = a.alone==="n/a" ? "n/a" : fmt(a.alone);
+    L.push("11. Alleinsein / bei mir bleiben: "+al); pn("alone");
+    if(a.alone!=null && a.alone!=="n/a" && has(a.alone_text)){
+      L.push("    Konnte ich meinen eigenen Tag oder Abend leben, oder habe ich innerlich auf Mandy gewartet? "+a.alone_text);
+    }
+    L.push("12. Stärkster Impuls heute: "+fmt(a.impulse)); pn("impulse");
+    L.push("13. Körpermarker: "+((a.body&&a.body.length)?a.body.join(", "):"—")); pn("body");
+    var ea = a.early==="n/a" ? "n/a" : fmt(a.early);
+    L.push("14. Frühes Bemerken: "+ea); pn("early");
+    if(a.early!=="n/a" && has(a.sentence)){
+      L.push("15. Ein ehrlicher Satz: „Bevor ich alles erklärt, kontrolliert oder verstanden habe, war ich "+a.sentence+"“");
+    }
+    if(a.sit_has==="ja"){
+      var sit=[];
+      if(has(a.sit_what))   sit.push("- Was ist konkret passiert? "+a.sit_what);
+      if(has(a.sit_body))   sit.push("- Was habe ich im Körper bemerkt? "+a.sit_body);
+      if(has(a.sit_first))  sit.push("- Welcher Satz kam zuerst? "+a.sit_first);
+      if(has(a.sit_want))   sit.push("- Was wollte ich unmittelbar tun? "+a.sit_want);
+      if(has(a.sit_did))    sit.push("- Was habe ich tatsächlich getan? "+a.sit_did);
+      if(has(a.sit_dur))    sit.push("- Wie lange hat es gedauert, bis ich wieder bei mir war? "+a.sit_dur);
+      if(has(a.sit_change)) sit.push("- Was wollte ich durch meine Reaktion bei Mandy verändern? "+a.sit_change);
+      L.push("");
+      L.push("16. Wichtige Situation mit Mandy:");
+      if(sit.length) L.push.apply(L, sit);
+    }
+    return L.join("\n");
+  }
+
+  function renderReport(){
+    top.hidden=false;
+    count.textContent="Fertig";
+    fill.style.width="100%";
+    var text=buildReport();
+    var saveBtn = Store.ok
+      ? '<button class="btn save" id="save">'+(savedToday?"Gespeichert ✓":"Für heute speichern")+'</button>'
+      : '';
+    var d=el(
+      '<div class="enter">'+
+      '<p class="eyebrow">Abschluss</p>'+
+      '<h2 class="q">Dein Bericht für Joe</h2>'+
+      '<p class="hint">Prüf ihn kurz, kopiere ihn und schick ihn ab.</p>'+
+      '<div class="report" id="report"></div>'+
+      '<div class="report-actions">'+
+        '<button class="btn primary" id="copy">Bericht kopieren</button>'+
+        saveBtn+
+        '<button class="btn ghost" id="edit">Zurück zu den Fragen</button>'+
+        '<button class="skip" id="restart">Neuen Tag beginnen</button>'+
+      '</div>'+
+      (Store.ok?'':'<p class="tiny-note" style="text-align:center;margin-top:14px">Verlauf auf diesem Gerät nicht verfügbar – dieser Bericht wird nicht dauerhaft gespeichert. Kopiere ihn zum Sichern.</p>')+
+      '</div>');
+    stage.innerHTML=""; stage.appendChild(d);
+    document.getElementById("report").textContent=text;
+    document.getElementById("copy").onclick=function(){ copy(text); };
+    document.getElementById("edit").onclick=function(){ screen="step"; pos=visibleSteps().length-1; render(); };
+    document.getElementById("restart").onclick=function(){
+      if(confirm("Alle Antworten löschen und neu beginnen?")){ answers={}; savedToday=false; screen="intro"; pos=0; render(); }
+    };
+    var sv=document.getElementById("save");
+    if(sv){
+      sv.onclick=function(){
+        var key=todayKey();
+        var exists = days.indexOf(key)>-1;
+        if(exists && !savedToday && !confirm("Für heute ("+prettyDate(key)+") existiert schon ein Eintrag. Überschreiben?")) return;
+        sv.disabled=true; sv.textContent="Speichere …";
+        var entry={ date:key, savedAt:new Date().toISOString(), report:text, answers:answers };
+        Store.save(key, entry).then(function(good){
+          sv.disabled=false;
+          if(good){
+            savedToday=true;
+            if(days.indexOf(key)===-1){ days.push(key); days.sort(); }
+            sv.textContent="Gespeichert ✓";
+            showToastMsg("Für "+prettyDate(key)+" gespeichert");
+          } else {
+            sv.textContent="Speichern fehlgeschlagen";
+          }
+        });
+      };
+    }
+  }
+
+  function copy(text){
+    var done=function(){ showToast(); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else fallback();
+    function fallback(){
+      var ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed";
+      ta.style.opacity="0"; document.body.appendChild(ta); ta.select();
+      try{document.execCommand("copy");}catch(e){} document.body.removeChild(ta); done();
+    }
+  }
+  var toastT;
+  function showToastMsg(msg){
+    toast.textContent=msg;
+    toast.classList.add("show");
+    clearTimeout(toastT);
+    toastT=setTimeout(function(){toast.classList.remove("show");},1900);
+  }
+  function showToast(){ showToastMsg("In die Zwischenablage kopiert"); }
+
+  function esc(s){
+    return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  // keyboard: Enter advances when possible
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Enter" && !e.shiftKey && screen==="step"){
+      var t=document.activeElement;
+      if(t && t.tagName==="TEXTAREA") return; // allow newlines in textareas
+      var btn=document.getElementById("next");
+      if(btn && !btn.disabled){ e.preventDefault(); btn.click(); }
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
