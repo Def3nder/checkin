@@ -272,67 +272,79 @@
     { id:"energy", type:"scale", num:"2", eyebrow:"Vitalität",
       title:"Wie viel Energie hast du?", low:"leer", high:"voll" },
     { id:"stress", type:"scale", num:"3", eyebrow:"Anspannung",
-      title:"Stress und innere Anspannung", low:"ruhig", high:"stark" },
-    { id:"nervous", type:"choice", num:"4", eyebrow:"Nervensystem", custom:true,
+      title:"Durchschnittlicher Stress / innere Anspannung", low:"ruhig", high:"stark" },
+    { id:"peak", type:"scale_na", num:"4", eyebrow:"Höchste Anspannung",
+      title:"Wie hoch war die Anspannung in der Spitze?", low:"gering", high:"sehr hoch" },
+    { id:"peak_first", type:"text", num:"4", eyebrow:"Höchste Anspannung",
+      title:"Erster Gedanke", placeholder:"Was ging dir als Erstes durch den Kopf?",
+      when:peak },
+    { id:"peak_dur", type:"text", num:"4", eyebrow:"Höchste Anspannung",
+      title:"Dauer bis zur Beruhigung",
+      placeholder:"z. B. 20 Minuten / 2 Stunden / den ganzen Tag", when:peak },
+    { id:"peak_rest", type:"text", num:"4", eyebrow:"Höchste Anspannung",
+      title:"Was blieb nach der Klärung noch übrig?", placeholder:"In deinen eigenen Worten …",
+      when:peak },
+    { id:"nervous", type:"choice", num:"5", eyebrow:"Nervensystem", custom:true,
       title:"Wie ist dein Nervensystem heute?",
       options:["ruhig und präsent","angespannt","stark im Kopf und grübelnd","zurückgezogen oder erstarrt","Flucht- oder Klärungsimpuls"] },
-    { id:"joy", type:"scale", num:"5", eyebrow:"Stimmung",
+    { id:"joy", type:"scale", num:"6", eyebrow:"Stimmung",
       title:"Lebensfreude und Stimmung", low:"gedrückt", high:"hell" },
-    { id:"worth", type:"scale", num:"6", eyebrow:"Selbstwert",
+    { id:"worth", type:"scale", num:"7", eyebrow:"Selbstwert",
       title:"Selbstwert und innere Sicherheit", low:"unsicher", high:"sicher" },
-    { id:"appetite", type:"choice", num:"7", eyebrow:"Körper",
+    { id:"appetite", type:"choice", num:"8", eyebrow:"Körper",
       title:"Wie war dein Appetit?", options:["normal","stärker","schwächer"] },
-    { id:"libido", type:"choice", num:"8", eyebrow:"Verlangen", custom:true,
+    { id:"libido", type:"choice", num:"9", eyebrow:"Verlangen", custom:true,
       title:"Libido heute",
       options:["keine","körperliche Lust","Sehnsucht nach Nähe","Wunsch nach Bestätigung","Mischung"] },
-    { id:"sexmind", type:"scale", num:"9", eyebrow:"Aufmerksamkeit",
+    { id:"sexmind", type:"scale", num:"10", eyebrow:"Aufmerksamkeit",
       title:"Wie viel Raum hatte das Sex-Thema heute im Kopf?", low:"gar keinen", high:"sehr viel" },
-    { id:"sex", type:"choice", num:"10", eyebrow:"Intimität",
+    { id:"sex", type:"choice", num:"11", eyebrow:"Intimität",
       title:"Sex oder sexuelle Intimität?", options:["ja","nein"] },
-    { id:"sex_who", type:"choice", num:"10", eyebrow:"Intimität",
+    { id:"sex_who", type:"choice", num:"11", eyebrow:"Intimität",
       title:"Wer hat begonnen?", options:["ich","Mandy"],
       when:function(a){return a.sex==="ja";} },
-    { id:"sex_after", type:"text", num:"10", eyebrow:"Intimität",
+    { id:"sex_after", type:"text", num:"11", eyebrow:"Intimität",
       title:"Wie ging es dir danach?", placeholder:"In deinen eigenen Worten …",
       when:function(a){return a.sex==="ja";} },
-    { id:"alone", type:"scale_na", num:"11", eyebrow:"Bei mir bleiben",
+    { id:"alone", type:"scale_na", num:"12", eyebrow:"Bei mir bleiben",
       title:"Alleinsein und bei mir bleiben", low:"schwer", high:"leicht" },
-    { id:"alone_text", type:"text", num:"11", eyebrow:"Bei mir bleiben",
+    { id:"alone_text", type:"text", num:"12", eyebrow:"Bei mir bleiben",
       title:"Konnte ich meinen eigenen Tag oder Abend leben — oder habe ich innerlich auf Mandy gewartet?",
       placeholder:"In deinen eigenen Worten …",
       when:function(a){return a.alone!=null && a.alone!=="n/a";} },
-    { id:"impulse", type:"choice", num:"12", eyebrow:"Impuls", custom:true,
+    { id:"impulse", type:"choice", num:"13", eyebrow:"Impuls", custom:true,
       title:"Stärkster Impuls heute",
       options:["warten und beobachten","kontrollieren","klären","zurückziehen","mich ausdrücken","etwas Eigenes tun"] },
-    { id:"body", type:"multi", num:"13", eyebrow:"Körpermarker", custom:true,
+    { id:"body", type:"multi", num:"14", eyebrow:"Körpermarker", custom:true,
       title:"Was hat sich im Körper gezeigt?",
       hint:"Mehrfachauswahl möglich.",
       options:["Bauch eng","Brustdruck","Kiefer angespannt","Herzklopfen","Unruhe","Erstarren","kein klarer Marker"],
       exclusive:"kein klarer Marker" },
-    { id:"early", type:"scale_na", num:"14", eyebrow:"Achtsamkeit",
+    { id:"early", type:"scale_na", num:"15", eyebrow:"Achtsamkeit",
       title:"Wie früh habe ich erkannt, was gerade in mir passiert?", low:"spät", high:"früh" },
-    { id:"sentence", type:"sentence", num:"15", eyebrow:"Ein ehrlicher Satz",
+    { id:"sentence", type:"sentence", num:"16", eyebrow:"Ein ehrlicher Satz",
       lead:"Bevor ich alles erklärt, kontrolliert oder verstanden habe, war ich",
       placeholder:"… (vervollständige den Satz)",
       when:function(a){return a.early!=null && a.early!=="n/a";} },
-    { id:"sit_has", type:"choice", num:"16", eyebrow:"Situation mit Mandy", noNote:true,
+    { id:"sit_has", type:"choice", num:"17", eyebrow:"Situation mit Mandy", noNote:true,
       title:"Gab es heute eine wichtige Situation mit Mandy?", options:["ja","nein"] },
-    { id:"sit_what", type:"text", num:"16", eyebrow:"Situation mit Mandy",
+    { id:"sit_what", type:"text", num:"17", eyebrow:"Situation mit Mandy",
       title:"Was ist konkret passiert?", when:sit },
-    { id:"sit_body", type:"text", num:"16", eyebrow:"Situation mit Mandy",
+    { id:"sit_body", type:"text", num:"17", eyebrow:"Situation mit Mandy",
       title:"Was habe ich im Körper bemerkt?", when:sit },
-    { id:"sit_first", type:"text", num:"16", eyebrow:"Situation mit Mandy",
+    { id:"sit_first", type:"text", num:"17", eyebrow:"Situation mit Mandy",
       title:"Welcher Satz kam zuerst?", when:sit },
-    { id:"sit_want", type:"text", num:"16", eyebrow:"Situation mit Mandy",
+    { id:"sit_want", type:"text", num:"17", eyebrow:"Situation mit Mandy",
       title:"Was wollte ich unmittelbar tun?", when:sit },
-    { id:"sit_did", type:"text", num:"16", eyebrow:"Situation mit Mandy",
+    { id:"sit_did", type:"text", num:"17", eyebrow:"Situation mit Mandy",
       title:"Was habe ich tatsächlich getan?", when:sit },
-    { id:"sit_dur", type:"text", num:"16", eyebrow:"Situation mit Mandy",
+    { id:"sit_dur", type:"text", num:"17", eyebrow:"Situation mit Mandy",
       title:"Wie lange hat es gedauert, bis ich wieder bei mir war?",
       placeholder:"z. B. 20 Minuten / 2 Stunden / den ganzen Tag", when:sit },
-    { id:"sit_change", type:"text", num:"16", eyebrow:"Situation mit Mandy",
+    { id:"sit_change", type:"text", num:"17", eyebrow:"Situation mit Mandy",
       title:"Was wollte ich durch meine Reaktion bei Mandy verändern?", when:sit }
   ];
+  function peak(a){ return a.peak!=null && a.peak!=="n/a"; }
   function sit(a){ return a.sit_has==="ja"; }
 
   // ---- State ----------------------------------------------------------------
@@ -906,43 +918,50 @@
       L.push("1. Schlaf: Dauer "+(has(a.sleep_h)?a.sleep_h+" h":"— h")+", Qualität "+fmt(a.sleep_q)); pn("sleep");
     }
     L.push("2. Energie: "+fmt(a.energy)); pn("energy");
-    L.push("3. Stress / innere Anspannung: "+fmt(a.stress)); pn("stress");
-    L.push("4. Nervensystem heute: "+fmt(a.nervous)); pn("nervous");
-    L.push("5. Lebensfreude / Stimmung: "+fmt(a.joy)); pn("joy");
-    L.push("6. Selbstwert / innere Sicherheit: "+fmt(a.worth)); pn("worth");
-    L.push("7. Appetit: "+fmt(a.appetite)); pn("appetite");
-    L.push("8. Libido: "+fmt(a.libido)); pn("libido");
-    L.push("9. Wie viel Raum hatte das Sex-Thema heute im Kopf? "+fmt(a.sexmind)); pn("sexmind");
-    L.push("10. Sex oder sexuelle Intimität: "+fmt(a.sex)); pn("sex");
+    L.push("3. Durchschnittlicher Stress / innere Anspannung: "+fmt(a.stress)); pn("stress");
+    var pk = a.peak==="n/a" ? "n/a" : fmt(a.peak);
+    L.push("4. Höchste Anspannung: "+pk); pn("peak");
+    if(a.peak!=="n/a"){
+      if(has(a.peak_first)) L.push("- Erster Gedanke: "+a.peak_first);
+      if(has(a.peak_dur))   L.push("- Dauer bis zur Beruhigung: "+a.peak_dur);
+      if(has(a.peak_rest))  L.push("- Was blieb nach der Klärung noch übrig: "+a.peak_rest);
+    }
+    L.push("5. Nervensystem heute: "+fmt(a.nervous)); pn("nervous");
+    L.push("6. Lebensfreude / Stimmung: "+fmt(a.joy)); pn("joy");
+    L.push("7. Selbstwert / innere Sicherheit: "+fmt(a.worth)); pn("worth");
+    L.push("8. Appetit: "+fmt(a.appetite)); pn("appetite");
+    L.push("9. Libido: "+fmt(a.libido)); pn("libido");
+    L.push("10. Wie viel Raum hatte das Sex-Thema heute im Kopf? "+fmt(a.sexmind)); pn("sexmind");
+    L.push("11. Sex oder sexuelle Intimität: "+fmt(a.sex)); pn("sex");
     if(a.sex==="ja"){
       var sub="    Wer hat begonnen: "+fmt(a.sex_who)+".";
       if(has(a.sex_after)) sub+=" Wie ging es dir danach? "+a.sex_after;
       L.push(sub); pn("sex_who");
     }
     var al = a.alone==="n/a" ? "n/a" : fmt(a.alone);
-    L.push("11. Alleinsein / bei mir bleiben: "+al); pn("alone");
+    L.push("12. Alleinsein / bei mir bleiben: "+al); pn("alone");
     if(a.alone!=null && a.alone!=="n/a" && has(a.alone_text)){
       L.push("    Konnte ich meinen eigenen Tag oder Abend leben, oder habe ich innerlich auf Mandy gewartet? "+a.alone_text);
     }
-    L.push("12. Stärkster Impuls heute: "+fmt(a.impulse)); pn("impulse");
-    L.push("13. Körpermarker: "+((a.body&&a.body.length)?a.body.join(", "):"—")); pn("body");
+    L.push("13. Stärkster Impuls heute: "+fmt(a.impulse)); pn("impulse");
+    L.push("14. Körpermarker: "+((a.body&&a.body.length)?a.body.join(", "):"—")); pn("body");
     var ea = a.early==="n/a" ? "n/a" : fmt(a.early);
-    L.push("14. Frühes Bemerken: "+ea); pn("early");
+    L.push("15. Frühes Bemerken: "+ea); pn("early");
     if(a.early!=="n/a" && has(a.sentence)){
-      L.push("15. Ein ehrlicher Satz: „Bevor ich alles erklärt, kontrolliert oder verstanden habe, war ich "+a.sentence+"“");
+      L.push("16. Ein ehrlicher Satz: „Bevor ich alles erklärt, kontrolliert oder verstanden habe, war ich "+a.sentence+"“");
     }
     if(a.sit_has==="ja"){
-      var sit=[];
-      if(has(a.sit_what))   sit.push("- Was ist konkret passiert? "+a.sit_what);
-      if(has(a.sit_body))   sit.push("- Was habe ich im Körper bemerkt? "+a.sit_body);
-      if(has(a.sit_first))  sit.push("- Welcher Satz kam zuerst? "+a.sit_first);
-      if(has(a.sit_want))   sit.push("- Was wollte ich unmittelbar tun? "+a.sit_want);
-      if(has(a.sit_did))    sit.push("- Was habe ich tatsächlich getan? "+a.sit_did);
-      if(has(a.sit_dur))    sit.push("- Wie lange hat es gedauert, bis ich wieder bei mir war? "+a.sit_dur);
-      if(has(a.sit_change)) sit.push("- Was wollte ich durch meine Reaktion bei Mandy verändern? "+a.sit_change);
+      var sitL=[];
+      if(has(a.sit_what))   sitL.push("- Was ist konkret passiert? "+a.sit_what);
+      if(has(a.sit_body))   sitL.push("- Was habe ich im Körper bemerkt? "+a.sit_body);
+      if(has(a.sit_first))  sitL.push("- Welcher Satz kam zuerst? "+a.sit_first);
+      if(has(a.sit_want))   sitL.push("- Was wollte ich unmittelbar tun? "+a.sit_want);
+      if(has(a.sit_did))    sitL.push("- Was habe ich tatsächlich getan? "+a.sit_did);
+      if(has(a.sit_dur))    sitL.push("- Wie lange hat es gedauert, bis ich wieder bei mir war? "+a.sit_dur);
+      if(has(a.sit_change)) sitL.push("- Was wollte ich durch meine Reaktion bei Mandy verändern? "+a.sit_change);
       L.push("");
-      L.push("16. Wichtige Situation mit Mandy:");
-      if(sit.length) L.push.apply(L, sit);
+      L.push("17. Wichtige Situation mit Mandy:");
+      if(sitL.length) L.push.apply(L, sitL);
     }
     return L.join("\n");
   }
